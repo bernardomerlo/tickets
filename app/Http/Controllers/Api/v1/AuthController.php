@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
@@ -10,7 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 
 /**
- * @OA\Info(title="My First API", version="0.1")
+ * @OA\Info(title="TicketAPI", version="0.1")
  */
 class AuthController extends Controller
 {

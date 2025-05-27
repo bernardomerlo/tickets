@@ -1,7 +1,7 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "My First API",
+        "title": "TicketAPI",
         "version": "0.1"
     },
     "paths": {
@@ -11,7 +11,7 @@
                     "Auth"
                 ],
                 "summary": "Registra um novo usuário",
-                "operationId": "ad77fe138bcb384ad65d167d5c8d1cc0",
+                "operationId": "a3f252b10cbf8e270739c3ada00c6042",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -76,7 +76,7 @@
                     "Auth"
                 ],
                 "summary": "Faz autenticação de usuário",
-                "operationId": "bae68d1c55329ecb6e41f48285840c8f",
+                "operationId": "eaf28e54bd4a4126b9668fe26e6d1411",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -112,12 +112,98 @@
                     }
                 }
             }
+        },
+        "/api/v1/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Revoga o token atual do usuário",
+                "operationId": "4f953f79b68161bb5120e6f95126c000",
+                "responses": {
+                    "200": {
+                        "description": "Logout realizado com sucesso"
+                    },
+                    "401": {
+                        "description": "Não autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/tickets": {
+            "post": {
+                "tags": [
+                    "Ticket"
+                ],
+                "summary": "Cria um novo Ticket",
+                "operationId": "d9cabc2f38b61406ec12f4d930b66cd7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "description",
+                                    "type"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "titulo de ticket"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "descricao de ticket"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "ti"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Ticket criado com sucesso!"
+                    },
+                    "401": {
+                        "description": "Credenciais inválidas"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "PersonalAccessToken",
+                "scheme": "bearer"
+            }
         }
     },
     "tags": [
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "Ticket",
+            "description": "Ticket"
         }
     ]
 }
