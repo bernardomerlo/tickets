@@ -35,6 +35,12 @@ class TicketController extends Controller
      */
     public function createTicket(CreateTicketRequest $request)
     {
+        $user = $request->user();
+        if(!$user->hasRole('cliente')){
+            return response()->json([
+                'message' => 'Você não pode abrir tickets'
+            ], 403);
+        }
         $ticket = Ticket::create([
             'title' => $request->title,
             'description' => $request->description,

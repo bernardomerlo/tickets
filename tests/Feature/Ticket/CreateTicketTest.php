@@ -7,12 +7,16 @@ use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function () {
+    $this->seed(\Database\Seeders\RolesSeeder::class);
+});
+
 /** Helper para autenticar rapidamente */
 function acting(): User
 {
     $user = User::factory()->create();
     Sanctum::actingAs($user);
-
+    $user->assignRole('cliente');
     return $user;
 }
 

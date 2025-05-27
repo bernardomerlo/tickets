@@ -4,6 +4,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function () {
+    $this->seed(\Database\Seeders\RolesSeeder::class);
+});
+
 it('registers a user successfully', function () {
     $payload = [
         'full_name' => 'Wesley Safadão',
