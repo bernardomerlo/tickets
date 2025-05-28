@@ -35,6 +35,7 @@ return new class extends Migration
         });
 
         if (DB::getDriverName() === 'pgsql') {
+            DB::statement("DROP TYPE IF EXISTS ticket_type CASCADE");
             $values = "'" . implode("','", TicketType::values()) . "'";
             DB::statement("CREATE TYPE ticket_type AS ENUM ({$values})");
             DB::statement("ALTER TABLE tickets ALTER COLUMN type TYPE ticket_type USING type::ticket_type");
