@@ -4,6 +4,8 @@ namespace Database\Factories;
 
 use App\Models\Ticket;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Enums\TicketType;
+use App\Models\User;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Ticket>

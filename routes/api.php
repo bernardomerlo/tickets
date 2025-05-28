@@ -12,6 +12,9 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
 
-        Route::post('/tickets', [TicketController::class, 'createTicket'])->middleware(EnsureUserHasRole::class . ':cliente');
+        Route::prefix('tickets')->group(function () {
+            Route::post('/', [TicketController::class, 'createTicket'])->middleware(EnsureUserHasRole::class . ':cliente');
+            Route::patch('/{id}/assign', [TicketController::class, 'assignTicket'])->middleware(EnsureUserHasRole::class . ':admin');
+        });
     });
 });

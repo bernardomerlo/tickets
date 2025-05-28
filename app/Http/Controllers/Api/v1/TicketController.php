@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateTicketRequest;
+use App\Http\Requests\AssignTicketRequest;
 use App\Models\Ticket;
+use App\Models\User;
 
 class TicketController extends Controller
 {
@@ -52,5 +54,22 @@ class TicketController extends Controller
         ]);
 
         return response()->json($ticket->load(['author', 'assignee']), 201);
+    }
+
+    public function assignTicket(AssignTicketRequest $request, $id)
+    {
+        $ticket = Ticket::find($id);
+
+        if (!$ticket) {
+            return response()->json(['message' => 'Ticket não encontrado.'], 404);
+        }
+
+        $ticket->assigned_user_id = $request->assigned_user_id;
+        $ticket->save();
+
+        return response()->json([
+            'message' => 'Responsável atribuído com sucesso.',
+            'ticket' => $ticket->load(['assignee', 'author'])
+        ], 200);
     }
 }
