@@ -62,10 +62,26 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Usuário registrado com sucesso"
+                        "description": "Usuário registrado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|abc123..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "400": {
-                        "description": "Requisição inválida"
+                        "description": "Dados inválidos na requisição"
                     }
                 }
             }
@@ -75,7 +91,7 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Faz autenticação de usuário",
+                "summary": "Autentica um usuário",
                 "operationId": "eaf28e54bd4a4126b9668fe26e6d1411",
                 "requestBody": {
                     "required": true,
@@ -105,7 +121,23 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Usuário autenticado com sucesso"
+                        "description": "Login realizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|abc123..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "description": "Credenciais inválidas"
@@ -118,29 +150,94 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Revoga o token atual do usuário",
+                "summary": "Revoga o token atual do usuário autenticado",
                 "operationId": "4f953f79b68161bb5120e6f95126c000",
                 "responses": {
                     "200": {
-                        "description": "Logout realizado com sucesso"
+                        "description": "Logout realizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logout realizado com sucesso."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "401": {
-                        "description": "Não autenticado"
+                        "description": "Token inválido ou ausente"
                     }
                 },
                 "security": [
                     {
-                        "sanctum": []
+                        "bearerAuth": []
                     }
                 ]
             }
         },
         "/api/v1/tickets": {
+            "get": {
+                "tags": [
+                    "Ticket"
+                ],
+                "summary": "Lista tickets filtrando por status (abertos ou fechados)",
+                "operationId": "5b6909c0a1de09b0287a11d6aec0dd92",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filtra os tickets por status: 'abertos' ou 'fechados'",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "abertos",
+                                "fechados"
+                            ],
+                            "example": "abertos"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de tickets retornada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Ticket"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Parâmetro de status inválido"
+                    },
+                    "403": {
+                        "description": "Acesso negado. Role necessária: admin|atendente"
+                    },
+                    "401": {
+                        "description": "Usuário não autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "post": {
                 "tags": [
                     "Ticket"
                 ],
-                "summary": "Cria um novo Ticket",
+                "summary": "Cria um novo ticket",
                 "operationId": "d9cabc2f38b61406ec12f4d930b66cd7",
                 "requestBody": {
                     "required": true,
@@ -155,11 +252,11 @@
                                 "properties": {
                                     "title": {
                                         "type": "string",
-                                        "example": "titulo de ticket"
+                                        "example": "Erro ao salvar formulário"
                                     },
                                     "description": {
                                         "type": "string",
-                                        "example": "descricao de ticket"
+                                        "example": "Nada acontece ao clicar em salvar"
                                     },
                                     "type": {
                                         "type": "string",
@@ -173,10 +270,20 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Ticket criado com sucesso!"
+                        "description": "Ticket criado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ticket"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Usuário não possui permissão para abrir tickets"
                     },
                     "401": {
-                        "description": "Credenciais inválidas"
+                        "description": "Usuário não autenticado"
                     }
                 },
                 "security": [
@@ -191,8 +298,19 @@
                 "tags": [
                     "Ticket"
                 ],
-                "summary": "Atribui um ticket para um usuário",
+                "summary": "Atribui um ticket a um usuário",
                 "operationId": "a5dabfb5f2a16371d27ce52528d8d957",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do ticket",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -204,7 +322,7 @@
                                 "properties": {
                                     "assigned_user_id": {
                                         "type": "integer",
-                                        "example": "1"
+                                        "example": 2
                                     }
                                 },
                                 "type": "object"
@@ -213,14 +331,30 @@
                     }
                 },
                 "responses": {
-                    "201": {
-                        "description": "Responsável atribuído com sucesso."
+                    "200": {
+                        "description": "Usuário atribuído com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Responsável atribuído com sucesso."
+                                        },
+                                        "ticket": {
+                                            "$ref": "#/components/schemas/Ticket"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Ticket não encontrado."
+                        "description": "Ticket não encontrado"
                     },
                     "401": {
-                        "description": "Credenciais inválidas."
+                        "description": "Usuário não autenticado"
                     }
                 },
                 "security": [
@@ -232,6 +366,101 @@
         }
     },
     "components": {
+        "schemas": {
+            "Ticket": {
+                "title": "Ticket",
+                "required": [
+                    "id",
+                    "title",
+                    "description",
+                    "type",
+                    "created_by"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Erro no sistema"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "O sistema está travando quando clico em salvar."
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "ti"
+                    },
+                    "opened_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-05-28T12:34:56"
+                    },
+                    "closed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "assigned_user_id": {
+                        "type": "integer",
+                        "example": 2,
+                        "nullable": true
+                    },
+                    "created_by": {
+                        "type": "integer",
+                        "example": 5
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "title": "Usuário",
+                "required": [
+                    "id",
+                    "full_name",
+                    "username",
+                    "email"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "full_name": {
+                        "type": "string",
+                        "example": "João da Silva"
+                    },
+                    "username": {
+                        "type": "string",
+                        "example": "joaosilva"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "joao@example.com"
+                    },
+                    "birth_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "1990-01-01"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-05-01T10:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-05-20T14:45:00Z"
+                    }
+                },
+                "type": "object"
+            }
+        },
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",

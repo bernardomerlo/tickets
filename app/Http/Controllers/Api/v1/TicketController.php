@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateTicketRequest;
 use App\Http\Requests\AssignTicketRequest;
 use App\Models\Ticket;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class TicketController extends Controller
@@ -14,32 +13,37 @@ class TicketController extends Controller
     /**
      * @OA\Post(
      *     path="/api/v1/tickets",
-     *     summary="Cria um novo Ticket",
+     *     summary="Cria um novo ticket",
      *     tags={"Ticket"},
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             required={"title", "description", "type"},
-     *             @OA\Property(property="title", type="string", example="titulo de ticket"),
-     *             @OA\Property(property="description", type="string", example="descricao de ticket"),
+     *             @OA\Property(property="title", type="string", example="Erro ao salvar formulário"),
+     *             @OA\Property(property="description", type="string", example="Nada acontece ao clicar em salvar"),
      *             @OA\Property(property="type", type="string", example="ti")
      *         )
      *     ),
      *     @OA\Response(
      *         response=201,
-     *         description="Ticket criado com sucesso!"
+     *         description="Ticket criado com sucesso",
+     *         @OA\JsonContent(ref="#/components/schemas/Ticket")
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Usuário não possui permissão para abrir tickets"
      *     ),
      *     @OA\Response(
      *         response=401,
-     *         description="Credenciais inválidas"
+     *         description="Usuário não autenticado"
      *     )
      * )
      */
     public function createTicket(CreateTicketRequest $request)
     {
         $user = $request->user();
-        if(!$user->hasRole('cliente')){
+        if (!$user->hasRole('cliente')) {
             return response()->json([
                 'message' => 'Você não pode abrir tickets'
             ], 403);
@@ -60,28 +64,39 @@ class TicketController extends Controller
     /**
      * @OA\Patch(
      *     path="/api/v1/tickets/{id}/assign",
-     *     summary="Atribui um ticket para um usuário",
+     *     summary="Atribui um ticket a um usuário",
      *     tags={"Ticket"},
      *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do ticket",
+     *         @OA\Schema(type="integer")
+     *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             required={"assigned_user_id"},
-     *             @OA\Property(property="assigned_user_id", type="int", example="1"),
+     *             @OA\Property(property="assigned_user_id", type="integer", example=2)
      *         )
      *     ),
      *     @OA\Response(
-     *         response=201,
-     *         description="Responsável atribuído com sucesso."
+     *         response=200,
+     *         description="Usuário atribuído com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Responsável atribuído com sucesso."),
+     *             @OA\Property(property="ticket", ref="#/components/schemas/Ticket")
+     *         )
      *     ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Ticket não encontrado."
-     *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Credenciais inválidas."
-     *      )
+     *     @OA\Response(
+     *         response=404,
+     *         description="Ticket não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Usuário não autenticado"
+     *     )
      * )
      */
     public function assignTicket(AssignTicketRequest $request, $id)
@@ -101,14 +116,59 @@ class TicketController extends Controller
         ], 200);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/v1/tickets",
+     *     summary="Lista tickets filtrando por status (abertos ou fechados)",
+     *     tags={"Ticket"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         required=true,
+     *         description="Filtra os tickets por status: 'abertos' ou 'fechados'",
+     *         @OA\Schema(type="string", enum={"abertos", "fechados"}, example="abertos")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de tickets retornada com sucesso",
+     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Ticket"))
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Parâmetro de status inválido"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acesso negado. Role necessária: admin|atendente"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Usuário não autenticado"
+     *     )
+     * )
+     */
     public function listTickets(Request $request)
     {
         $user = $request->user();
+        $status = $request->query('status');
+
+        if (!in_array($status, ['abertos', 'fechados'])) {
+            return response()->json(['message' => 'Parâmetro de status inválido. Use "abertos" ou "fechados".'], 400);
+        }
+
+        $query = Ticket::query();
+
+        if ($status === 'abertos') {
+            $query->whereNull('closed_at');
+        } elseif ($status === 'fechados') {
+            $query->whereNotNull('closed_at');
+        }
 
         if ($user->hasRole('admin')) {
-            $tickets = Ticket::all();
+            $tickets = $query->get();
         } elseif ($user->hasRole('atendente')) {
-            $tickets = Ticket::where('assigned_user_id', $user->id)->get();
+            $tickets = $query->where('assigned_user_id', $user->id)->get();
         } else {
             return response()->json(['message' => 'Não autorizado.'], 403);
         }

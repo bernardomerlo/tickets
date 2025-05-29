@@ -33,11 +33,15 @@ class AuthController extends Controller
      *     ),
      *     @OA\Response(
      *         response=201,
-     *         description="Usuário registrado com sucesso"
+     *         description="Usuário registrado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="user", ref="#/components/schemas/User"),
+     *             @OA\Property(property="token", type="string", example="1|abc123...")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=400,
-     *         description="Requisição inválida"
+     *         description="Dados inválidos na requisição"
      *     )
      * )
      */
@@ -64,7 +68,7 @@ class AuthController extends Controller
     /**
      * @OA\Post(
      *     path="/api/v1/login",
-     *     summary="Faz autenticação de usuário",
+     *     summary="Autentica um usuário",
      *     tags={"Auth"},
      *     @OA\RequestBody(
      *         required=true,
@@ -76,7 +80,11 @@ class AuthController extends Controller
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Usuário autenticado com sucesso"
+     *         description="Login realizado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="user", ref="#/components/schemas/User"),
+     *             @OA\Property(property="token", type="string", example="1|abc123...")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=401,
@@ -104,12 +112,21 @@ class AuthController extends Controller
 
     /**
      * @OA\Post(
-     *   path="/api/v1/logout",
-     *   summary="Revoga o token atual do usuário",
-     *   tags={"Auth"},
-     *   security={{"sanctum":{}}},
-     *   @OA\Response(response=200, description="Logout realizado com sucesso"),
-     *   @OA\Response(response=401, description="Não autenticado")
+     *     path="/api/v1/logout",
+     *     summary="Revoga o token atual do usuário autenticado",
+     *     tags={"Auth"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Logout realizado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Logout realizado com sucesso.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Token inválido ou ausente"
+     *     )
      * )
      */
     public function logout(): JsonResponse
