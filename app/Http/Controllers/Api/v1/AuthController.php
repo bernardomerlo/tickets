@@ -104,7 +104,7 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $token = $user->createToken('api_token')->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'user' => $user->makeHidden(['password']),
