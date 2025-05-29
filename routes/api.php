@@ -17,6 +17,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/', [TicketController::class, 'createTicket'])->middleware(EnsureUserHasRole::class . ':cliente');
             Route::patch('/{id}/assign', [TicketController::class, 'assignTicket'])->middleware(EnsureUserHasRole::class . ':admin');
             Route::patch('/{id}/close', [TicketController::class, 'closeTicket'])->middleware(EnsureUserHasRole::class . ':admin|atendente');
+            Route::post('/{id}/addMessage', [TicketController::class, 'addMessage']);
         });
     });
 });

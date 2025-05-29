@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AddMessageRequest;
 use App\Http\Requests\CreateTicketRequest;
 use App\Http\Requests\AssignTicketRequest;
 use App\Http\Requests\CloseTicketRequest;
@@ -232,4 +233,55 @@ class TicketController extends Controller
     }
 
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/tickets/{id}/addMessage",
+     *     summary="Adiciona uma mensagem a um ticket",
+     *     tags={"Ticket"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do ticket",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"message"},
+     *             @OA\Property(property="message", type="string", example="Poderia anexar o print do erro?")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Mensagem adicionada com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="user_id", type="integer", example=3),
+     *             @OA\Property(property="message", type="string", example="Poderia anexar o print do erro?"),
+     *             @OA\Property(property="created_at", type="string", format="date-time", example="2025-05-29T12:34:56Z")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Ticket não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Usuário não autenticado"
+     *     )
+     * )
+     */
+    public function addMessage(AddMessageRequest $request, $ticketId)
+    {
+        $ticket = Ticket::findOrFail($ticketId);
+
+        $message = $ticket->messages()->create([
+            'user_id' => $request->user()->id,
+            'message' => $request->message,
+        ]);
+
+        return response()->json($message->load('author'), 201);
+    }
 }
