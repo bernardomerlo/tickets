@@ -13,6 +13,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
 
         Route::prefix('tickets')->group(function () {
+            Route::get('/', [TicketController::class, 'listTickets'])->middleware(EnsureUserHasRole::class . ':admin|atendente');
             Route::post('/', [TicketController::class, 'createTicket'])->middleware(EnsureUserHasRole::class . ':cliente');
             Route::patch('/{id}/assign', [TicketController::class, 'assignTicket'])->middleware(EnsureUserHasRole::class . ':admin');
         });

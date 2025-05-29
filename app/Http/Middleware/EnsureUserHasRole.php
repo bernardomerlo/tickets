@@ -13,11 +13,13 @@ class EnsureUserHasRole
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle($request, Closure $next, $role)
+    public function handle($request, Closure $next, $roles)
     {
-        if (!$request->user() || !$request->user()->hasRole($role)) {
+        $roles = array_map('trim', explode(',', $roles));   // ← transforma em array
+
+        if (!$request->user()?->hasAnyRole($roles)) {
             return response()->json([
-                'message' => 'Acesso negado. Role necessária: ' . $role,
+                'message' => 'Acesso negado. Role necessária: ' . implode('|', $roles),
             ], 403);
         }
 

@@ -7,6 +7,7 @@ use App\Http\Requests\CreateTicketRequest;
 use App\Http\Requests\AssignTicketRequest;
 use App\Models\Ticket;
 use App\Models\User;
+use Illuminate\Http\Request;
 
 class TicketController extends Controller
 {
@@ -99,4 +100,20 @@ class TicketController extends Controller
             'ticket' => $ticket->load(['assignee', 'author'])
         ], 200);
     }
+
+    public function listTickets(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->hasRole('admin')) {
+            $tickets = Ticket::all();
+        } elseif ($user->hasRole('atendente')) {
+            $tickets = Ticket::where('assigned_user_id', $user->id)->get();
+        } else {
+            return response()->json(['message' => 'Não autorizado.'], 403);
+        }
+
+        return response()->json($tickets);
+    }
+
 }
