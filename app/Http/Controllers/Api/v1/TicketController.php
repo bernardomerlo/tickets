@@ -56,6 +56,33 @@ class TicketController extends Controller
         return response()->json($ticket->load(['author', 'assignee']), 201);
     }
 
+    /**
+     * @OA\Patch(
+     *     path="/api/v1/tickets/{id}/assign",
+     *     summary="Atribui um ticket para um usuário",
+     *     tags={"Ticket"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"assigned_user_id"},
+     *             @OA\Property(property="assigned_user_id", type="int", example="1"),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Responsável atribuído com sucesso."
+     *     ),
+     *      @OA\Response(
+     *          response=404,
+     *          description="Ticket não encontrado."
+     *      ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Credenciais inválidas."
+     *      )
+     * )
+     */
     public function assignTicket(AssignTicketRequest $request, $id)
     {
         $ticket = Ticket::find($id);

@@ -185,6 +185,50 @@
                     }
                 ]
             }
+        },
+        "/api/v1/tickets/{id}/assign": {
+            "patch": {
+                "tags": [
+                    "Ticket"
+                ],
+                "summary": "Atribui um ticket para um usuário",
+                "operationId": "a5dabfb5f2a16371d27ce52528d8d957",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "assigned_user_id"
+                                ],
+                                "properties": {
+                                    "assigned_user_id": {
+                                        "type": "integer",
+                                        "example": "1"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Responsável atribuído com sucesso."
+                    },
+                    "404": {
+                        "description": "Ticket não encontrado."
+                    },
+                    "401": {
+                        "description": "Credenciais inválidas."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
