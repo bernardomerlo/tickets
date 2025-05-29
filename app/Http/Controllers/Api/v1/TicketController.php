@@ -9,6 +9,7 @@ use App\Http\Requests\AssignTicketRequest;
 use App\Http\Requests\CloseTicketRequest;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class TicketController extends Controller
 {
@@ -45,7 +46,7 @@ class TicketController extends Controller
     public function createTicket(CreateTicketRequest $request)
     {
         $user = $request->user();
-        if (!$user->hasRole('cliente')) {
+        if ($user->hasRole('atendente')) {
             return response()->json([
                 'message' => 'Você não pode abrir tickets'
             ], 403);
@@ -172,7 +173,7 @@ class TicketController extends Controller
         } elseif ($user->hasRole('atendente')) {
             $tickets = $query->where('assigned_user_id', $user->id)->get();
         } else {
-            return response()->json(['message' => 'Não autorizado.'], 403);
+            $tickets = $query->where('created_by', $user->id)->get();
         }
 
         return response()->json($tickets);

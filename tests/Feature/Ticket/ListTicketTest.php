@@ -67,16 +67,6 @@ it('permite que atendente veja apenas seus tickets atribuídos e abertos', funct
         ->assertJsonCount(2);
 });
 
-it('impede que cliente acesse a listagem de tickets', function () {
-    $cliente = User::factory()->create();
-    $cliente->assignRole('cliente');
-    Sanctum::actingAs($cliente);
-
-    $this->getJson('/api/v1/tickets?status=abertos')
-        ->assertForbidden()
-        ->assertJson(['message' => 'Acesso negado. Role necessária: admin|atendente']);
-});
-
 it('retorna 401 para não autenticado tentando listar tickets', function () {
     $this->getJson('/api/v1/tickets?status=abertos')
         ->assertUnauthorized()
@@ -91,4 +81,38 @@ it('retorna 400 quando status é inválido', function () {
     $this->getJson('/api/v1/tickets?status=invalido')
         ->assertStatus(400)
         ->assertJson(['message' => 'Parâmetro de status inválido. Use "abertos" ou "fechados".']);
+});
+
+it('permite que cliente veja apenas seus próprios tickets abertos e fechados', function () {
+    $cliente = User::factory()->create();
+    $cliente->assignRole('cliente');
+    Sanctum::actingAs($cliente);
+
+    Ticket::factory()->count(2)->create([
+        'created_by' => $cliente->id,
+        'closed_at' => null
+    ]);
+
+    Ticket::factory()->count(1)->create([
+        'created_by' => $cliente->id,
+        'closed_at' => now()
+    ]);
+
+    Ticket::factory()->count(3)->create([
+        'created_by' => User::factory()->create()->id,
+        'closed_at' => null
+    ]);
+
+    Ticket::factory()->count(2)->create([
+        'created_by' => User::factory()->create()->id,
+        'closed_at' => now()
+    ]);
+
+    $this->getJson('/api/v1/tickets?status=abertos')
+        ->assertOk()
+        ->assertJsonCount(2);
+
+    $this->getJson('/api/v1/tickets?status=fechados')
+        ->assertOk()
+        ->assertJsonCount(1);
 });
