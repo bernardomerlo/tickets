@@ -16,6 +16,7 @@ it('registers a user successfully', function () {
         'birth_date' => '1990-01-01',
         'password' => 'secret123',
         'password_confirmation' => 'secret123',
+        'department' => 'ti',
     ];
 
     $response = $this->postJson('/api/v1/register', $payload);

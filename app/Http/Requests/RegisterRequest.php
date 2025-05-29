@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\UserDepartment;
+use Illuminate\Validation\Rules\Enum;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RegisterRequest extends FormRequest
@@ -27,6 +29,7 @@ class RegisterRequest extends FormRequest
             'email' => 'required|email|unique:users,email',
             'birth_date' => 'required|date|before:today',
             'password' => 'required|string|min:8|confirmed',
+            'department' => ['required', new Enum(UserDepartment::class)],
         ];
     }
 }

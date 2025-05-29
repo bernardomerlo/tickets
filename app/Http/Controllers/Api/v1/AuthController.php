@@ -28,7 +28,8 @@ class AuthController extends Controller
      *             @OA\Property(property="email", type="string", format="email", example="joao@email.com"),
      *             @OA\Property(property="birth_date", type="string", format="date", example="1990-01-01"),
      *             @OA\Property(property="password", type="string", format="password", example="senhaSegura123"),
-     *             @OA\Property(property="password_confirmation", type="string", format="password", example="senhaSegura123")
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="senhaSegura123"),
+     *             @OA\Property(property="department", type="string", enum={"ti", "marketing", "financeiro"}, example="ti")
      *         )
      *     ),
      *     @OA\Response(
@@ -53,6 +54,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'birth_date' => $request->birth_date,
             'password' => Hash::make($request->password),
+            'department' => $request->department
         ]);
 
         $user->assignRole("cliente");

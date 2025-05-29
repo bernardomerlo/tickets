@@ -53,6 +53,15 @@
                                         "type": "string",
                                         "format": "password",
                                         "example": "senhaSegura123"
+                                    },
+                                    "department": {
+                                        "type": "string",
+                                        "enum": [
+                                            "ti",
+                                            "marketing",
+                                            "financeiro"
+                                        ],
+                                        "example": "ti"
                                     }
                                 },
                                 "type": "object"
@@ -514,6 +523,15 @@
                         "type": "string",
                         "format": "date-time",
                         "example": "2024-05-20T14:45:00Z"
+                    },
+                    "department": {
+                        "type": "string",
+                        "enum": [
+                            "ti",
+                            "marketing",
+                            "financeiro"
+                        ],
+                        "example": "ti"
                     }
                 },
                 "type": "object"

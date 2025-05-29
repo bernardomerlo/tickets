@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserDepartment;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -20,7 +21,13 @@ use Spatie\Permission\Traits\HasRoles;
  *     @OA\Property(property="email", type="string", format="email", example="joao@example.com"),
  *     @OA\Property(property="birth_date", type="string", format="date", example="1990-01-01"),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2024-05-01T10:00:00Z"),
- *     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-05-20T14:45:00Z")
+ *     @OA\Property(property="updated_at", type="string", format="date-time", example="2024-05-20T14:45:00Z"),
+ *     * @OA\Property(
+ *         property="department",
+ *         type="string",
+ *         enum={"ti", "marketing", "financeiro"},
+ *         example="ti"
+ *     )
  * )
  */
 class User extends Authenticatable
@@ -42,5 +49,6 @@ class User extends Authenticatable
 
     protected $casts = [
         'birth_date' => 'date',
+        'department' => UserDepartment::class
     ];
 }
