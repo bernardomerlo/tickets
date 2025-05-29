@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateTicketRequest;
 use App\Http\Requests\AssignTicketRequest;
+use App\Http\Requests\CloseTicketRequest;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 
@@ -175,5 +176,60 @@ class TicketController extends Controller
 
         return response()->json($tickets);
     }
+
+    /**
+     * @OA\Patch(
+     *     path="/api/v1/tickets/{id}/close",
+     *     summary="Fecha um ticket",
+     *     tags={"Ticket"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID do ticket",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Ticket fechado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Ticket fechado com sucesso."),
+     *             @OA\Property(property="ticket", ref="#/components/schemas/Ticket")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Ticket já está fechado"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Ticket não encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acesso negado. Role necessária: admin|atendente"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Usuário não autenticado"
+     *     )
+     * )
+     */
+    public function closeTicket(CloseTicketRequest $request, $id)
+    {
+        $ticket = Ticket::findOrFail($id);
+
+        abort_if($ticket->closed_at !== null, 400, 'Ticket já está fechado.');
+
+        $ticket->closed_at = now();
+        $ticket->save();
+
+        return response()->json([
+            'message' => 'Ticket fechado com sucesso.',
+            'ticket' => $ticket->load(['author', 'assignee']),
+        ]);
+    }
+
 
 }

@@ -363,6 +363,64 @@
                     }
                 ]
             }
+        },
+        "/api/v1/tickets/{id}/close": {
+            "patch": {
+                "tags": [
+                    "Ticket"
+                ],
+                "summary": "Fecha um ticket",
+                "operationId": "2433a0d141986623768b7edc129b1dc7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID do ticket",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ticket fechado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ticket fechado com sucesso."
+                                        },
+                                        "ticket": {
+                                            "$ref": "#/components/schemas/Ticket"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Ticket já está fechado"
+                    },
+                    "404": {
+                        "description": "Ticket não encontrado"
+                    },
+                    "403": {
+                        "description": "Acesso negado. Role necessária: admin|atendente"
+                    },
+                    "401": {
+                        "description": "Usuário não autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
